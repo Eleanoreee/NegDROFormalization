@@ -1,17 +1,16 @@
 # NegDRO Formalization
 
-NegDRO (Negative-Weighted Distributionally Robust Optimization) uses signed environmental
-weights to promote risk invariance across environments. This project Lean-verifies a
-finite-dimensional stochastic NegDRO extension combining projected stochastic primal descent
-with exponentiated-gradient dual ascent. Under a corrected realized
-additive-intervention reduced-form model, a universal fresh conditional sampling law,
-fourth-moment bounds, a spectral heterogeneity condition, and a nonempty closed convex feasible
-set, it derives explicit finite-time, averaged-iterate, and inverse-square-root expected
-squared-error bounds. It is not a literal formalization of Algorithm 1 in
-[arXiv:2412.11850v3](https://arxiv.org/abs/2412.11850v3).
+NegDRO (Negative-Weighted Distributionally Robust Optimization), introduced in
+[_Causal Invariance Learning via Efficient Nonconvex Optimization_](https://arxiv.org/abs/2412.11850v3),
+uses signed environmental weights to promote risk invariance across environments. This project
+Lean-verifies a finite-dimensional stochastic NegDRO extension combining projected stochastic
+primal descent with exponentiated-gradient dual ascent. Under a realized additive-intervention
+reduced-form model, a universal fresh conditional sampling law, fourth-moment bounds, a spectral
+heterogeneity condition, and a nonempty closed convex feasible set, it derives explicit
+finite-time, averaged-iterate, and inverse-square-root expected squared-error bounds.
 
 The project gives a complete Lean-verified conditional convergence proof for this
-finite-dimensional corrected-additive-model, fresh-sample, nearest-point-projected SGD/EG
+finite-dimensional additive-intervention model, fresh-sample, nearest-point-projected SGD/EG
 extension. Concrete oracle unbiasedness, moment bounds, oracle integrability, entropy regret,
 primal recursion, spectral curvature, Euclidean projection, finite-time bounds,
 averaged-iterate bounds, and inverse-square-root rates are derived from the final stated model,
@@ -31,8 +30,8 @@ Detailed scope and cross-references are in:
 
 ## Main result
 
-The six public entry points prove finite-time and averaged-iterate expected squared-error bounds,
-plus inverse-square-root specializations for equal step sizes. The complete theorem statements and
+Finite-time and averaged-iterate expected squared-error bounds are proved, together with
+inverse-square-root specializations for equal step sizes. The complete theorem statements and
 constants appear below; their dependency chain is recorded in the theorem map.
 
 ## Main algorithm
@@ -141,7 +140,7 @@ simplex EG trajectory, and oracle measurability.
 
 ```mermaid
 flowchart TD
-  SEM["Corrected additive reduced form"]
+  SEM["Additive-intervention reduced form"]
   LAW["Fresh conditional sampling law"]
   MOM["Concrete oracle moments and unbiasedness"]
   GEO["Spectral curvature and Euclidean projection"]
@@ -155,31 +154,12 @@ flowchart TD
   ALG --> CONV
 ```
 
-## Important source correction
+## Scope
 
-The development follows the algebra implied by Eq. (10) of the official v3 PDF. Direct
-elimination from
-
-$$
-Y=\beta^{\star\top}X+\varepsilon_Y,
-\qquad
-X=B_{YX}Y+B_{XX}X+\varepsilon_X
-$$
-
-gives a lower-left inverse block with `+ G^T B_YX`. Appendix E.1 Eq. (97) instead prints a
-negative sign. The negative cross terms subsequently printed in `H` also conflict with the
-displayed positive-block PSD factorization. The Lean model therefore uses the corrected positive
-sign forced by Eq. (10); it does not claim to verify the inconsistent printed Eq. (97) identity.
-
-## Scope boundary
-
-> **This is not a literal formalization of Algorithm 1 in arXiv:2412.11850v3.**
-
-Official Algorithm 1 exactly maximizes the empirical penalized risk over `w` at every round and
-then takes a primal gradient step. This project instead studies simultaneous fresh-sample
-projected stochastic primal descent and exponentiated-gradient dual ascent. The project also
-accepts the realized reduced-form objects `GT`, `BYX`, `etaY`, `etaX`, and `delta` at its final
-entry point; it does not reconstruct that entry point from a complete acyclic block SEM.
+The formalization studies simultaneous fresh-sample projected stochastic primal descent and
+exponentiated-gradient dual ascent. Its final entry point accepts the realized reduced-form
+objects `GT`, `BYX`, `etaY`, `etaX`, and `delta`; it does not reconstruct them from a complete
+acyclic block SEM.
 
 The conclusions concern expected squared error, its time average, and the expected squared error
 of the averaged iterate. There is no last-iterate, high-probability, or expected-norm theorem, and
