@@ -1,0 +1,63 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage[ruled,vlined]{algorithm2e}
+\usepackage{xcolor}
+\usepackage{microtype}
+\usepackage[hidelinks]{hyperref}
+\usepackage{soul}
+\sethlcolor{yellow}
+\usepackage{xeCJK}
+\setCJKmainfont{PingFang SC}
+\setCJKmonofont{PingFang SC}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{assumption}[theorem]{Assumption}
+\newtheorem{definition}[theorem]{Definition}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+\newcommand{\todo}[1]{\textcolor{red}{[TODO: #1]}}
+\newcommand{\audit}[1]{\textcolor{blue}{[AUDIT: #1]}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\norm}[1]{\left\lVert #1\right\rVert}
+\newcommand{\inner}[2]{\left\langle #1,#2\right\rangle}
+\newcommand{\cE}{\mathcal{E}}
+\newcommand{\cL}{\mathcal{L}}
+\newcommand{\simplex}{\Delta^{|\cE|}}
+\newcommand{\betastar}{\beta^\star}
+
+\title{A Lean-Verified Fresh-Sample Stochastic Extension of
+Negative-Weighted Distributionally Robust Optimization}
+\author{Eleanore Wu}
+\date{Version 1.0 --- September 2026\\[0.4em]
+\small Accompanying mathematical note for the Lean formalization}
+
+\begin{document}
+
+\maketitle
+
+\input{sections/00_summary}
+\input{sections/01_introduction}
+\input{sections/02_problem_setup}
+\input{sections/03_penalized}
+\input{sections/04_unpenalized}
+\input{sections/05_discussion}
+\input{sections/06_verification}
+
+\appendix
+\input{sections/A_proof_details}
+\input{sections/B_version_map}
+
+\input{sections/99_references}
+
+\end{document}

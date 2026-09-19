@@ -1,0 +1,82 @@
+\section{Introduction and Background}
+\label{sec:introduction}
+
+\subsection{NegDRO and causal invariance}
+
+Multi-environment data can distinguish a stable causal relationship from
+environment-specific predictive associations.  Wang, Hu, B\"uhlmann, and
+Guo~\cite{wang2026negdro} formulate this idea as Negative-Weighted
+Distributionally Robust Optimization (NegDRO), a continuous minimax problem
+whose effective environmental weights may be negative.  The negative weights
+penalize disparities between environmental risks and thereby encourage risk
+invariance.  Under additive interventions and sufficient environmental
+heterogeneity, their population analysis relates stationarity of the NegDRO
+objective to recovery of the causal outcome coefficient $\beta^*$.
+
+The official algorithms in arXiv:2412.11850v3 optimize empirical risks from a
+fixed data set.  In particular, official Algorithm~1 computes an exact
+penalized maximizer in the environmental weight and then takes a primal
+gradient step.  The present work addresses a different question: can one use
+one fresh environmental observation per round, update the primal and dual
+variables simultaneously, and obtain a direct population error bound?  The
+answer given here is conditional on an explicit fresh-sampling law and moment,
+geometry, and heterogeneity assumptions.
+
+\subsection{The stochastic extension}
+
+At each round, our method evaluates both stochastic oracles at the current
+predictable state $(b_t,w_t)$.  It takes a projected descent step in $b$ and an
+exponentiated-gradient ascent step in $w$.  The two oracles may be formed from
+the same observation; their mutual independence is neither assumed nor used.
+The analysis compares $w_t$ with a fixed simplex vector $w^0$ whose
+heterogeneity matrix has eigenvalues bounded below by $\lambda>0$.  This
+witness is an analytical comparator, not the algorithmic initialization.
+
+The proof has a common structure in the penalized and unpenalized cases:
+\[
+  \begin{gathered}
+    \text{corrected risk expansion}
+    \Longrightarrow \text{fixed-witness curvature}
+    \Longrightarrow \text{comparator identity}\\
+    \Longrightarrow \text{entropy regret}
+    \Longrightarrow \text{projected primal recursion}.
+  \end{gathered}
+\]
+The unpenalized comparator identity transfers the dual regret with a factor of
+two.  The penalized identity adds exactly the direction loss $2\mu$, which
+becomes the squared-error bias $2\mu/\lambda$ after the curvature division.
+Instantaneous comparator regret is not assumed to be nonnegative.
+
+\subsection{Contributions and verified scope}
+
+This note makes the following contributions.
+\begin{itemize}[leftmargin=*]
+  \item It states a corrected realized reduced form for additive interventions and
+        derives the common population-risk expansion used by the online
+        analysis.  The sign convention is forced by direct elimination from
+        the structural equations; the discrepancy with the printed official
+        Appendix~E.1 identity is documented in
+        Section~\ref{subsec:corrected-reduced-form}.
+  \item It analyzes a fresh-sample stochastic projected-SGD/EG recursion on a
+        general nonempty closed convex bounded set.  The universal conditional
+        sampling law yields the required selected moments, conditional oracle
+        means, and oracle integrability.
+  \item It gives exact finite-time bounds for the time-average of expected
+        squared errors and for the expected squared error of the averaged
+        iterate.  Equal steps $\eta_b=\eta_w=T^{-1/2}$ yield explicit
+        inverse-square-root optimization terms.
+  \item It provides a complete Lean-verified conditional proof of this chain.
+        Completeness is relative to the stated model, sampling, moment,
+        spectral, and feasible-set hypotheses; it is not an assumption-free
+        claim or an external certification.
+\end{itemize}
+
+The result is neither a last-iterate nor a high-probability theorem.  A
+separate square-root consequence concerns root mean square error and must not
+be read as a bound on expected norm.  The project also does not construct an
+infinite independent sample stream or a product probability space.  These
+scope boundaries are summarized in Section~\ref{sec:discussion}.
+
+We use arXiv:2412.11850v3, revised January~7, 2026, as the source version of
+the original paper.  Statements attributed to that paper and statements
+proved for the stochastic extension are distinguished throughout.

@@ -1,0 +1,74 @@
+\section{Lean Verification Status}
+\label{sec:verification}
+
+The formalization is implemented in Lean~4~\cite{lean4} on top of
+Mathlib~\cite{mathlib}.  Target~A---the complete conditional convergence
+theorem for the finite-dimensional corrected-additive-model, fresh-sample,
+nearest-point-projected SGD/EG extension---is complete.
+
+\subsection{Checked public interface}
+
+The root imports all 50 project modules.  The six publication-level entry
+points are defined in
+\texttt{AdditiveInterventionSamplingProjectedConvergence.lean}:
+\begin{enumerate}[leftmargin=*]
+  \item \texttt{stochasticNegDRO\_additiveSampling\_projected\_unpenalized\_convergence};
+  \item \texttt{stochasticNegDRO\_additiveSampling\_projected\_unpenalized\_averaged\_convergence};
+  \item \texttt{stochasticNegDRO\_additiveSampling\_projected\_unpenalized\_invSqrt\_rate};
+  \item \texttt{stochasticNegDRO\_additiveSampling\_projected\_penalized\_convergence};
+  \item \texttt{stochasticNegDRO\_additiveSampling\_projected\_penalized\_averaged\_convergence};
+  \item \texttt{stochasticNegDRO\_additiveSampling\_projected\_penalized\_invSqrt\_rate}.
+\end{enumerate}
+The first, second, fourth, and fifth correspond to the four theorem statements
+in Sections~\ref{sec:penalized} and~\ref{sec:unpenalized}; the other two are
+the displayed inverse-square-root corollaries.  The repository's detailed
+mathematical dependency map is \texttt{docs/THEOREM\_MAP.md}.
+
+The final projected assumption structure has 30 fields: eight model and
+reduced-form fields, five sampling and adaptedness fields, and seventeen
+geometry and optimization fields.  It also uses the ambient
+\texttt{IsProbabilityMeasure} instance, and penalized conclusions require
+$\mu\ge0$.  The model fields encode primitive product integrability,
+systematic/intervention orthogonality, environmental measurability, and
+fourth-moment integrability and bounds.  The sampling fields encode filtration
+monotonicity, ambient inclusion, the universal fresh law, and next-round
+measurability of the two concrete oracles.  The remaining fields encode the
+closed convex bounded feasible geometry, initialization and target
+feasibility, $m,T>0$, positive steps, parameter signs, the simplex
+witness, and its genuine eigenvalue lower bound.
+
+Coordinatewise primal and dual integrability, primal squared-norm
+integrability, and integrability of the squared dual coordinate-bound process
+are not fields of this public interface.  They are derived in
+\texttt{OracleIntegrabilityBridge.lean} from selected fourth moments, bounded
+trajectory feasibility, simplex invariance, and measurability.
+
+\subsection{Local build and trust boundary}
+
+The checked working tree pins
+\begin{itemize}[leftmargin=*]
+  \item Lean \texttt{v4.34.0-rc2}; and
+  \item Mathlib commit
+        \texttt{85e3a25e006c35636f0e53b0e9296caca2685bc0}.
+\end{itemize}
+Running \texttt{lake build} locally completes successfully with 8814 jobs.
+The root imports 50 out of 50 project source modules.  A full Lean-source scan
+finds none of \texttt{sorry}, \texttt{admit}, \texttt{sorryAx}, custom
+\texttt{axiom} declarations, \texttt{unsafe}, \texttt{opaque},
+\texttt{native\_decide}, \texttt{implemented\_by}, or \texttt{extern}.
+
+Local \texttt{\#print axioms} checks on the central oracle-integrability,
+Euclidean-projection, and six final convergence/rate theorems report only
+\texttt{propext}, \texttt{Classical.choice}, and \texttt{Quot.sound}.  These
+are the standard foundations reached through Mathlib in this development.
+The results above describe a checked local working tree; they are not a claim
+of independent third-party reproduction or peer review.  The model, sampling,
+moment, spectral, and feasible-set conditions remain mathematical hypotheses
+of the theorem.
+
+AI tools assisted with library-API discovery, translation of paper algebra
+into Lean statements, refactoring, debugging, and adversarial source-semantic
+checks.  AI-generated text or code was not treated as verification.  Claims
+were retained only after elaboration, kernel checking, full builds, source
+scans, and repeated comparison of the public declarations with their
+mathematical interpretation.

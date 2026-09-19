@@ -1,0 +1,92 @@
+\section{Source and Verification Map}
+\label{app:version-map}
+
+This note uses arXiv:2412.11850v3, revised January~7, 2026, as the canonical
+source for the original NegDRO formulation and its empirical algorithms.  The
+fresh-sample projected-SGD/EG theorem is an extension developed in this note.
+The table separates inherited source material, verified extension results,
+retained model assumptions, and out-of-scope constructions.
+
+\begin{center}
+\small
+\begin{tabular}{>{\raggedright\arraybackslash}p{0.26\textwidth}
+                >{\raggedright\arraybackslash}p{0.22\textwidth}
+                >{\raggedright\arraybackslash}p{0.42\textwidth}}
+\toprule
+Component & Status & Source or checked Lean module \\
+\midrule
+NegDRO objectives and empirical exact-maximization algorithms
+& Original-paper result
+& Wang et al.~\cite{wang2026negdro}, especially official Algorithms~1--2 \\
+
+Positive-sign realized additive reduced form
+& Verified; source discrepancy
+& \texttt{AdditiveIntervention}\newline
+  \texttt{PopulationBridge.lean}; follows Eq.~(10), not
+  the inconsistent printed Appendix~E.1 Eq.~(97) \\
+
+Population risk and moment bridges
+& Verified
+& \texttt{PopulationRiskMomentBridge.lean} and
+  \texttt{AdditiveIntervention}\newline
+  \texttt{SamplingBridge.lean} \\
+
+Spectral witness to coordinate curvature
+& Verified under the stated eigenvalue hypothesis
+& \texttt{SpectralCurvatureBridge.lean} and
+  \texttt{SpectralWitnessInterface.lean} \\
+
+Universal fresh conditional law
+& Assumed model condition
+& \texttt{FreshSamplingLaw.lean}; its moment and conditional-mean
+  consequences are verified \\
+
+Concrete oracle moments and integrability
+& Verified
+& \texttt{ConcreteOracle}\newline
+  \texttt{MomentBounds.lean} and
+  \texttt{OracleIntegrabilityBridge.lean} \\
+
+Entropy geometry, finite Pinsker, and EG regret
+& Verified
+& \texttt{FinitePinsker.lean}, \texttt{EGTrajectoryRegret.lean}, and
+  \texttt{StochasticDualRegret.lean} \\
+
+Euclidean nearest-point projection
+& Verified
+& \texttt{EuclideanProjectionBridge.lean} \\
+
+Expected projected primal recursion and averaging
+& Verified
+& \texttt{StochasticPrimalTrajectory.lean} and
+  \texttt{AveragedPrimalIterate.lean} \\
+
+Six final projected convergence/rate entry points
+& Verified
+& \texttt{AdditiveIntervention}\newline
+  \texttt{SamplingProjected}\newline
+  \texttt{Convergence.lean} \\
+
+Infinite i.i.d. stream or product-space construction
+& Out of scope
+& The universal fresh conditional law remains an explicit hypothesis \\
+
+Literal verification of official v3 Algorithm~1
+& Out of scope
+& The verified recursion uses simultaneous fresh-sample projected SGD/EG \\
+
+Formal \texttt{Asymptotics.IsBigO} wrapper
+& Out of scope
+& Exact finite inequalities and inverse-square-root identities are proved \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The pinned implementation uses Lean \texttt{v4.34.0-rc2} and the following
+Mathlib commit:
+\[
+  \texttt{85e3a25e006c35636f0e53b0e9296caca2685bc0}.
+\]
+The statements in this appendix describe the local checked working tree
+accompanying Version~1.0 of the note; they do not constitute independent
+third-party reproduction.

@@ -1,0 +1,140 @@
+\section{Unpenalized NegDRO}
+\label{sec:unpenalized}
+
+The unpenalized population objective
+$\Phi(b)=\max_{w\in\Delta_m}\mathcal L(b,w)$ may be nonsmooth because the
+inner objective is linear in $w$.  The stochastic extension does not attempt
+to select a maximizing $w$ at every round.  It applies
+\eqref{eq:common-primal-update}--\eqref{eq:common-dual-update} with $\mu=0$
+and controls static regret against the same fixed witness $w^0$.
+
+\subsection{Direction and comparator reduction}
+
+Let $\varepsilon_{\rm id}$ be as in
+\eqref{eq:penalized-identification-error}.
+\begin{lemma}[Unpenalized fixed-witness direction]
+\label{lem:unpenalized-fixed-witness}
+For every $b\in\R^p$,
+\begin{equation}
+  (b-\beta^*)^\top\nabla_b\mathcal L(b,w^0)
+  \ge
+  \lambda\|b-\beta^*\|_2^2-\varepsilon_{\rm id}.
+  \label{eq:unpenalized-fixed-witness-rsi}
+\end{equation}
+\end{lemma}
+The proof is the same fixed-witness curvature and vector Young inequality used
+in Lemma~\ref{lem:penalized-fixed-witness}.
+
+Define
+\begin{equation}
+  \operatorname{Reg}_t^0
+  :=\mathcal L(b_t,w^0)-\mathcal L(b_t,w_t).
+  \label{eq:unpenalized-comparator-regret}
+\end{equation}
+The sign convention is comparator minus current, although the instantaneous
+quantity may be negative.
+
+\begin{lemma}[Unpenalized comparator reduction]
+\label{lem:unpenalized-comparator-reduction}
+For every round $t$,
+\begin{equation}
+  (b_t-\beta^*)^\top\nabla_b\mathcal L(b_t,w_t)
+  \ge
+  \lambda\|b_t-\beta^*\|_2^2
+  -\varepsilon_{\rm id}-2\operatorname{Reg}_t^0.
+  \label{eq:unpenalized-comparator-direction}
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+The common term in the loss--gradient identity is independent of $w$, so
+subtracting the identity at $w^0$ and $w_t$ gives
+\[
+  (b_t-\beta^*)^\top\nabla_b\mathcal L(b_t,w_t)
+  =(b_t-\beta^*)^\top\nabla_b\mathcal L(b_t,w^0)
+   -2\operatorname{Reg}_t^0.
+\]
+Lemma~\ref{lem:unpenalized-fixed-witness} completes the proof.
+\end{proof}
+
+The entropy mirror theorem described in Section~\ref{sec:penalized} no longer
+takes Pinsker or the mirror-step conclusion as hypotheses.  Under its stated
+simplex, positivity, and step-size conditions, it yields
+\begin{equation}
+  \sum_{t=1}^T\E[\operatorname{Reg}_t^0]
+  \le
+  \frac{\log m}{\eta_w}
+  +\frac{\eta_wT G_{w,0}^2}{2}.
+  \label{eq:unpenalized-static-regret}
+\end{equation}
+Substitution into the same expected projected recursion gives the final
+unpenalized bounds.
+
+\subsection{Verified unpenalized conclusions}
+
+\begin{theorem}[Unpenalized finite-time expected squared error]
+\label{thm:unpenalized-fixed-comparator}
+Under the assumptions of Section~\ref{sec:setup}, with $\mu=0$, the recursion
+satisfies
+\begin{equation}
+  \boxed{
+  D_T
+  \le
+  \frac{\|b_{\rm Init}-\beta^*\|_2^2}
+       {2\lambda\eta_bT}
+  +\frac{\|v_{\rm SEM}\|_2^2}
+       {\lambda^2(1+\gamma m)^2}
+  +\frac{2\log m}{\lambda\eta_wT}
+  +\frac{\eta_wG_{w,0}^2}{\lambda}
+  +\frac{\eta_bG_b^2}{2\lambda}.}
+  \label{eq:unpenalized-average-bound}
+\end{equation}
+\end{theorem}
+
+\begin{theorem}[Unpenalized averaged-iterate expected squared error]
+\label{thm:unpenalized-averaged-iterate}
+The averaged iterate satisfies
+\begin{equation}
+  \boxed{
+  \E\|\bar b_T-\beta^*\|_2^2
+  \le
+  \frac{\|b_{\rm Init}-\beta^*\|_2^2}
+       {2\lambda\eta_bT}
+  +\frac{\|v_{\rm SEM}\|_2^2}
+       {\lambda^2(1+\gamma m)^2}
+  +\frac{2\log m}{\lambda\eta_wT}
+  +\frac{\eta_wG_{w,0}^2}{\lambda}
+  +\frac{\eta_bG_b^2}{2\lambda}.}
+  \label{eq:unpenalized-averaged-iterate-bound}
+\end{equation}
+\end{theorem}
+
+The identification contribution in the direction inequality is
+$\varepsilon_{\rm id}$; division by $\lambda$ in the primal recursion produces
+the displayed final bias
+$\|v_{\rm SEM}\|_2^2/[\lambda^2(1+\gamma m)^2]$.
+
+Define the exact inverse-square-root coefficient
+\begin{equation}
+  C_0
+  :=\frac{\|b_{\rm Init}-\beta^*\|_2^2}{2\lambda}
+    +\frac{2\log m}{\lambda}
+    +\frac{G_{w,0}^2}{\lambda}
+    +\frac{G_b^2}{2\lambda}.
+  \label{eq:unpenalized-rate-constant}
+\end{equation}
+
+\begin{corollary}[Unpenalized inverse-square-root rate]
+\label{cor:unpenalized-inv-sqrt}
+If $\eta_b=\eta_w=1/\sqrt T$, then
+\begin{equation}
+  D_T\le B_{\rm id}+\frac{C_0}{\sqrt T}.
+  \label{eq:unpenalized-inv-sqrt-rate}
+\end{equation}
+\end{corollary}
+
+This public rate theorem controls $D_T$, not the terminal state $b_{T+1}$.
+The separate
+averaged-iterate theorem retains the general positive step sizes and the same
+finite-time right-hand side; no additional averaged inverse-square-root public
+entry point is asserted here.

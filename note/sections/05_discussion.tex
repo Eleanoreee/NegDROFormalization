@@ -1,0 +1,107 @@
+\section{Discussion and Scope}
+\label{sec:discussion}
+
+\subsection{Relation to the official NegDRO algorithms}
+
+The verified theorem and the official algorithms answer related but distinct
+questions.  The official algorithms form empirical environmental risks from a
+fixed data set, solve an inner maximization, and select an iterate using a
+stationarity criterion.  The extension in this note targets population risks
+through a fresh conditional law and updates both variables online.
+
+\begin{center}
+\small
+\begin{tabular}{p{0.19\textwidth}p{0.35\textwidth}p{0.35\textwidth}}
+\toprule
+Feature & Official empirical method & Verified stochastic extension \\
+\midrule
+Data access
+& Fixed environment data sets, reused across iterations
+& One conditionally fresh environmental observation per round \\
+Dual operation
+& Exact empirical-risk maximization in $w$
+& One exponentiated-gradient ascent step \\
+Primal operation
+& Gradient or subgradient step for the empirical envelope
+& Euclidean nearest-point-projected stochastic descent \\
+Output analyzed
+& An iterate selected by a stationarity criterion
+& $D_T$ and the random averaged iterate $\bar b_T$ \\
+Guarantee
+& Official finite-sample and optimization results in
+  Wang et al.~\cite{wang2026negdro}
+& Conditional expected squared-error inequalities in
+  Theorems~\ref{thm:penalized-fixed-comparator}--
+  \ref{thm:unpenalized-averaged-iterate} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+This comparison does not imply a uniform sample- or computation-complexity
+ordering.  In the official method, an iteration may revisit a fixed data set.
+Here $T$ counts both online updates and fresh-law rounds.  The present Lean
+development is therefore not a literal formalization of official
+arXiv:2412.11850v3 Algorithm~1.
+
+\subsection{What the fixed witness accomplishes}
+
+The analytical weight $w^0$ separates identification from the algorithm's
+dual optimization.  Spectral curvature at $w^0$ gives the primal direction
+bound, while the comparator identity transfers the difference between $w^0$
+and $w_t$ into a dual objective regret.  Exponentiated-gradient ascent controls
+the cumulative comparator term even though an individual regret can be
+negative.  The projected primal recursion then converts this cumulative
+control into an expected squared-error bound.
+
+The penalized and unpenalized calculations differ in two explicit places.
+The dual oracle and its moment constant change from $G_{w,0}^2$ to
+$G_{w,\mu}^2$, and the simplex norm comparison contributes the structural
+bias $2\mu/\lambda$.  There is no accumulation into $2\mu T$ after averaging.
+
+\subsection{Scope boundaries}
+
+Target~A of the formalization is complete: the conditional theorem for the
+stochastic extension is kernel checked relative to its stated hypotheses.
+The following are genuine scope boundaries, not missing steps in that proof.
+\begin{enumerate}[leftmargin=*]
+  \item \emph{Sampling realization.}  The universal fresh conditional law
+        \eqref{eq:fresh-conditional-law} is assumed.  The project does not
+        construct a product probability space, a natural filtration, or an
+        infinite independent stream.
+  \item \emph{Reduced-form entry point.}  The final theorem begins with the
+        corrected realized maps
+        \eqref{eq:corrected-realized-X}--\eqref{eq:corrected-realized-Y}.
+        Separate Lean lemmas justify structural elimination from
+        \eqref{eq:sem} when the required inverse identity is supplied, but the
+        final wrapper does not derive $G^\top$ from $B_{XX}$ and acyclicity.
+  \item \emph{Expectation.}  The results are in expectation.  No
+        high-probability theorem or adaptive concentration result is claimed.
+  \item \emph{Output.}  The analysis controls the time average $D_T$ and the
+        expected squared error of $\bar b_T$.  It does not establish a
+        last-iterate guarantee.
+  \item \emph{Identification bias.}  The term $B_{\rm id}$ remains unless
+        $v_{\rm SEM}$ vanishes or is controlled through other structural
+        information.  The theorem does not silently identify it with an
+        optimization error.
+  \item \emph{Algorithmic scope.}  This fresh-sample simultaneous projected
+        SGD/EG method is not official v3 Algorithm~1 and does not verify exact
+        empirical-risk maximization.
+  \item \emph{Rate interface.}  The project proves explicit inequalities.  It
+        does not add a formal \texttt{IsBigO} wrapper, and the RMS
+        square-root consequence is not an expected-norm theorem.
+\end{enumerate}
+
+The fourth-moment, bounded-domain, spectral heterogeneity, sign, and
+fresh-law conditions remain substantive theorem hypotheses.  Calling the
+conditional proof complete does not mean that the theorem is assumption-free.
+
+\subsection{Conclusion}
+
+The corrected additive model, fixed spectral witness, conditional fresh-law
+oracle, entropy geometry, and Euclidean projection fit into one closed proof
+chain.  The resulting finite-time inequalities separate three effects:
+initialization and online optimization, the structural identification term
+$B_{\rm id}$, and---only in the penalized case---$2\mu/\lambda$.  This yields a
+self-contained mathematical account of the finite-dimensional stochastic
+extension and a precise boundary between that extension and the original
+empirical NegDRO algorithms.

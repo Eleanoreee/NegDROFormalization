@@ -1,0 +1,21 @@
+\begin{abstract}
+This note develops a finite-dimensional online stochastic extension of
+Negative-Weighted Distributionally Robust Optimization (NegDRO).  The method
+combines nearest-point-projected stochastic descent in the prediction
+parameter with exponentiated-gradient ascent in the environmental weights;
+both updates may use the same fresh observation.  Under a corrected realized
+additive-intervention reduced-form model, a universal fresh conditional law,
+fourth-moment bounds, a bounded closed convex feasible set, and a fixed
+spectral heterogeneity witness, we prove explicit finite-time and
+averaged-iterate expected squared-error bounds.  The complete conditional
+proof chain is verified in Lean~4 and Mathlib, including the realized model
+bridge, oracle unbiasedness and integrability, Euclidean projection, entropy
+regret, spectral curvature, and telescoping recursion.  With
+$\eta_b=\eta_w=T^{-1/2}$, the optimization contribution is of order
+$T^{-1/2}$ in expected squared error; the penalized result has the additional
+structural bias $2\mu/\lambda$.  The analysis is based on a fixed comparator
+and does not require independence between the two stochastic gradients.  It
+is an extension developed in this note, not a literal formalization of the
+empirical-risk exact-maximization Algorithm~1 in
+arXiv:2412.11850v3~\cite{wang2026negdro}.
+\end{abstract}

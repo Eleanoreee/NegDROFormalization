@@ -1,0 +1,364 @@
+\section{Model, Oracle, and Algorithm}
+\label{sec:setup}
+
+We write $\mathcal E=\{1,\ldots,m\}$ for the environments and
+\[
+  \Delta_m:=\left\{w\in\R_+^m:\sum_{e=1}^m w_e=1\right\}.
+\]
+All vector norms in the mathematical statements are Euclidean.  In Lean they
+are represented by the explicit coordinate sums
+$\operatorname{sqNorm}(x)=\sum_i x_i^2$ and
+$\operatorname{sqDist}(x,y)=\sum_i(x_i-y_i)^2$, rather than by the default
+norm on the raw function type $\operatorname{Fin}(p)\to\R$.
+
+\subsection{NegDRO population objectives}
+
+For an environmental pair $(X^e,Y^e)\in\R^p\times\R$, define
+\begin{equation}
+  R_e(b):=\E\bigl[(Y^e-b^\top X^e)^2\bigr].
+  \label{eq:population-risk}
+\end{equation}
+The original negative-weight set and its simplex reparameterization are
+\[
+  \mathcal U(\gamma)
+  :=\left\{u\in\R^m:\sum_eu_e=1,\ \min_eu_e\ge-\gamma\right\},
+  \qquad
+  u_e=(1+\gamma m)w_e-\gamma,
+\]
+where $\gamma\ge0$ and $w\in\Delta_m$.  After division by the positive
+constant $1+\gamma m$, set
+\begin{align}
+  a_\gamma&:=\frac{\gamma}{1+\gamma m},
+  \label{eq:a-gamma}\\
+  \mathcal L(b,w)&:=\sum_{e=1}^m(w_e-a_\gamma)R_e(b),
+  &\Phi(b)&:=\max_{w\in\Delta_m}\mathcal L(b,w),
+  \label{eq:unpenalized-negdro}\\
+  \mathcal L_\mu(b,w)&:=\mathcal L(b,w)-\mu\|w\|_2^2,
+  &\Phi_\mu(b)&:=\max_{w\in\Delta_m}\mathcal L_\mu(b,w).
+  \label{eq:penalized-negdro}
+\end{align}
+Here $\mu\ge0$ is the dual penalty.  The population objectives originate in
+the NegDRO formulation of Wang et al.~\cite{wang2026negdro}; the stochastic
+recursion studied below is the extension developed in this note.
+
+\subsection{Corrected realized additive-intervention model}
+\label{subsec:corrected-reduced-form}
+
+The structural equations are
+\begin{equation}
+  Y=\beta^{*\top}X+\varepsilon_Y,
+  \qquad
+  X=B_{YX}Y+B_{XX}X+\varepsilon_X.
+  \label{eq:sem}
+\end{equation}
+The additive-intervention decomposition writes the realized noises as
+\begin{equation}
+  \varepsilon_Y=\eta_Y,
+  \qquad
+  \varepsilon_X=\eta_X+\delta_e.
+  \label{eq:additive-intervention}
+\end{equation}
+The final Lean entry point starts from the resulting realized environmental
+maps, rather than reconstructing them from acyclicity or a block-inverse
+theorem.  Let
+\[
+  S:=(I-B_{XX})-B_{YX}\beta^{*\top},
+  \qquad G^\top S=I.
+\]
+Direct substitution in \eqref{eq:sem} gives
+\begin{equation}
+  SX=B_{YX}\varepsilon_Y+\varepsilon_X.
+  \label{eq:schur-elimination}
+\end{equation}
+Consequently the corrected realized maps used by the final theorem are
+\begin{align}
+  X^e
+  &=G^\top\bigl(B_{YX}\eta_Y+\eta_X+\delta_e\bigr),
+  \label{eq:corrected-realized-X}\\
+  Y^e
+  &=\beta^{*\top}X^e+\eta_Y.
+  \label{eq:corrected-realized-Y}
+\end{align}
+The Lean argument named \texttt{GT} represents the matrix denoted here by
+$G^\top$.  The inverse identity $G^\top S=I$ explains the structural
+elimination above, but it is not a field of the final public assumption
+bundle.  That interface starts from the corrected realized maps
+\eqref{eq:corrected-realized-X}--\eqref{eq:corrected-realized-Y}; it does not
+take $B_{XX}$ or acyclicity as parameters.
+
+The primitive model assumptions require integrability of the coordinate
+products needed for the second-moment calculation: $\eta_Y^2$,
+$\eta_Y\eta_{X,i}$, $\eta_Y\delta_{e,i}$,
+$\eta_{X,i}\eta_{X,j}$, $\eta_{X,i}\delta_{e,j}$,
+$\delta_{e,i}\eta_{X,j}$, and $\delta_{e,i}\delta_{e,j}$.  They also require
+the systematic/intervention cross moments to vanish, in particular
+\begin{equation}
+  \E[\eta_Y\delta_e]=0,
+  \qquad
+  \E[\eta_X\delta_e^\top]=0,
+  \label{eq:systematic-intervention-orthogonality}
+\end{equation}
+with the corresponding coordinate orientations.  These are substantive model
+assumptions in the final theorem.
+
+Define the systematic covariate noise
+$U:=B_{YX}\eta_Y+\eta_X$ and the common linear coefficient
+\begin{equation}
+  v_{\rm SEM}:=-G^\top\E[U\eta_Y].
+  \label{eq:v-sem}
+\end{equation}
+Under \eqref{eq:systematic-intervention-orthogonality},
+$\E[X^e\eta_Y]=-v_{\rm SEM}$ for every $e$.  With
+\begin{equation}
+  \sigma_Y^2:=\E[\eta_Y^2],
+  \qquad
+  \Sigma_e:=\E[X^eX^{e\top}],
+  \label{eq:sem-moments}
+\end{equation}
+the environmental risk therefore has the common expansion
+\begin{equation}
+  R_e(b)
+  =\sigma_Y^2
+   +2v_{\rm SEM}^\top(b-\beta^*)
+   +(b-\beta^*)^\top\Sigma_e(b-\beta^*).
+  \label{eq:risk-expansion}
+\end{equation}
+The Lean development proves this identity from the actual squared-loss
+integral and the realized moment relations; it does not identify two intended
+``KL-like'' or ``risk-like'' expressions by name alone.
+
+\begin{remark}[Source sign convention]
+Equation~(10) of arXiv:2412.11850v3 forces the positive term
+$+G^\top B_{YX}\varepsilon_Y$ in the reduced form
+\eqref{eq:corrected-realized-X}.  Appendix~E.1 Eq.~(97) instead prints the
+opposite sign in the lower-left inverse block.  The negative cross terms later
+printed in the matrix $H$ are also inconsistent with the displayed
+positive-block factorization.  The formalization follows the algebra implied
+by Eq.~(10) and verifies the corrected positive-sign identity.  It does not
+claim to verify the inconsistent printed Eq.~(97).  This is a source
+discrepancy, not an inference about the authors' intent.
+\end{remark}
+
+\subsection{Heterogeneity witness and feasible geometry}
+
+For $w\in\Delta_m$, define
+\begin{equation}
+  A(w):=\sum_{e=1}^m\left(w_e-\frac1m\right)\Sigma_e.
+  \label{eq:heterogeneity-matrix}
+\end{equation}
+\begin{assumption}[Fixed spectral witness]
+\label{ass:heterogeneity}
+There are $w^0\in\Delta_m$ and $\lambda>0$ such that every eigenvalue of the
+symmetric matrix $A(w^0)$ is at least $\lambda$.  Equivalently,
+\begin{equation}
+  A(w^0)\succeq\lambda I_p.
+  \label{eq:fixed-witness-condition}
+\end{equation}
+The fixed vector $w^0$ is used only in the proof; it is not supplied to the
+algorithm.
+\end{assumption}
+
+\begin{assumption}[Closed convex bounded feasible set]
+\label{ass:bounded-domain}
+Let $C\subseteq\R^p$ be nonempty, closed, and convex, with
+\begin{equation}
+  b_{\rm Init},\beta^*\in C,
+  \qquad
+  \|b\|_2^2\le B^2\quad\text{for every }b\in C,
+  \qquad B\ge0.
+  \label{eq:bounded-domain}
+\end{equation}
+Write $P_C$ for the Euclidean nearest-point projection onto $C$.
+\end{assumption}
+
+The formalization constructs $P_C$ by transporting coordinates to a Euclidean
+Hilbert space.  It proves existence, membership in $C$, uniqueness, the
+variational inequality, the strong Pythagorean (Fej\'er) inequality,
+nonexpansiveness, continuity, and measurability.  Thus the projection used in
+the final recursion is not an abstract Fej\'er interface.  The ball
+$C=\{b:\|b\|_2\le B\}$ is one concrete example.  Its classical explicit
+formula is
+\begin{equation}
+  P_C(z)=
+  \begin{cases}
+    z,&\|z\|_2\le B,\\
+    Bz/\|z\|_2,&\|z\|_2>B.
+  \end{cases}
+  \label{eq:ball-projection}
+\end{equation}
+The Lean development formalizes the general nearest-point construction used
+by the theorem; it does not separately package \eqref{eq:ball-projection} as
+a ball-specific theorem.
+
+\subsection{Fresh conditional sampling law}
+
+The stochastic process is defined on a probability space
+$(\Omega,\mathcal F,\mathbb P)$ with a pre-round filtration
+$(\mathcal F_{t-1})_{t\ge1}$.  At round $t$, the observed environment and data
+are $(E_t,X_t,Y_t)$.  Intuitively, $E_t$ is conditionally uniform and the
+observation is fresh from its selected environmental law.  The precise final
+assumption is the following law-level identity.
+
+\begin{assumption}[Universal fresh conditional law]
+\label{ass:online-unbiasedness}
+For each used round $t$, environment $e$, and real test function $\varphi$ that
+is integrable under the fixed environment law $\nu_e$,
+\begin{equation}
+  \E\!\left[
+    \mathbf 1_{\{E_t=e\}}\varphi(X_t,Y_t)
+    \mid\mathcal F_{t-1}
+  \right]
+  =\frac1m\int\varphi(X^e(\xi),Y^e(\xi))\,d\nu_e(\xi)
+  \quad\text{a.e.}
+  \label{eq:fresh-conditional-law}
+\end{equation}
+The selected test on the left is integrable, each $\nu_e$ is a probability
+measure, and the observed coordinates have the required a.e. strong
+measurability.  In the final additive wrapper, all $\nu_e$ are the common
+noise law $\nu$ and $(X^e,Y^e)$ are the realized maps
+\eqref{eq:corrected-realized-X}--\eqref{eq:corrected-realized-Y}.
+\end{assumption}
+
+Taking $\varphi=1$ gives conditional uniform environment selection.  Taking
+$XX$, $XY$, and $Y^2$ monomials gives the selected population moments; fourth
+degree tests give the raw moment inequalities used below.  These identities,
+together with predictability of the current state, derive conditional
+unbiasedness of the actual oracles.  Conditional oracle unbiasedness is not a
+separate final assumption.
+
+The filtration is increasing, each conditioning sigma-algebra is contained in
+the ambient sigma-algebra, and the round-$t$ primal and dual oracles are
+measurable with respect to the post-observation sigma-algebra $\mathcal F_t$.
+In Lean, this oracle measurability is assumed for every natural-number index,
+whereas the universal fresh law is required only for the used rounds $t\le T$.
+The current iterates are consequently $\mathcal F_{t-1}$-measurable.  These
+adaptedness and measurability conditions remain explicit assumptions.  The
+formalization does not construct a product probability space, a natural
+filtration, or an infinite independent stream.
+
+\subsection{Concrete oracles, moments, and integrability}
+
+Assume the environmental coordinates $X_i^e$ and outcomes $Y^e$ are a.e.
+strongly measurable.  Separately, assume the environmental fourth moments are
+measurable and integrable and
+satisfy, for nonnegative $K_X,K_Y$,
+\begin{equation}
+  \E\|X^e\|_2^4\le K_X,
+  \qquad
+  \E|Y^e|^4\le K_Y
+  \quad\text{for every }e.
+  \label{eq:data-fourth-moments}
+\end{equation}
+These assumptions do not require independence between $X^e$ and $Y^e$.
+
+At the predictable pair $(b_t,w_t)$, the concrete coordinate oracles are
+\begin{align}
+  [\widehat g_t^b]_i
+  &=2m\left(w_{t,E_t}-\frac{\gamma}{1+\gamma m}\right)
+       (X_t^\top b_t-Y_t)X_{t,i},
+  \label{eq:online-primal-gradient}\\
+  [\widehat g_t^{w,\mu}]_j
+  &=m(Y_t-X_t^\top b_t)^2\mathbf 1_{\{j=E_t\}}-2\mu w_{t,j}.
+  \label{eq:online-stochastic-gradients}
+\end{align}
+The unpenalized dual oracle is the specialization
+$\widehat g_t^{w,0}$.  The universal law gives, a.e.,
+\begin{align}
+  \E[\widehat g_t^b\mid\mathcal F_{t-1}]
+  &=\nabla_b\mathcal L_\mu(b_t,w_t),\\
+  \E[\widehat g_t^{w,\mu}\mid\mathcal F_{t-1}]
+  &=\nabla_w\mathcal L_\mu(b_t,w_t).
+  \label{eq:online-unbiasedness}
+\end{align}
+The first equality is independent of $\mu$ because the penalty contains no
+$b$.
+
+Here the population-gradient notation abbreviates the explicit
+finite-coordinate vector used in the formalization.  Lean proves its
+coordinate formula, the pairing identities required by the recursion, and
+the corresponding radial \texttt{HasDerivAt} statement; it does not expose a
+separate full Fr\'echet-gradient theorem.  No stronger differentiability
+claim is needed for the convergence inequalities below.
+
+The exact squared-moment constants used by the final theorems are
+\begin{align}
+  G_b^2
+  &:=4m\left(2\sqrt{K_YK_X}+2B^2K_X\right),
+  \label{eq:primal-moment-constant}\\
+  G_{w,0}^2
+  &:=m^2\left(8K_Y+8B^4K_X\right),
+  \label{eq:unpenalized-dual-moment-constant}\\
+  G_{w,\mu}^2
+  &:=2m^2\left(8K_Y+8B^4K_X\right)+8\mu^2.
+  \label{eq:penalized-dual-moment-constant}
+\end{align}
+These symbols already denote squared bounds and are never squared again.
+The derivation uses
+\begin{align*}
+  (X^\top b-Y)^2\|X\|_2^2
+  &\le2\|X\|_2^2Y^2+2B^2\|X\|_2^4,\\
+  (Y-X^\top b)^4
+  &\le8Y^4+8B^4\|X\|_2^4,
+\end{align*}
+the simplex bounds on $w_t$, and the fresh selected moments.  It yields the
+conditional estimates
+\begin{align}
+  \E[\|\widehat g_t^b\|_2^2\mid\mathcal F_{t-1}]&\le G_b^2,\\
+  \E[\|\widehat g_t^{w,0}\|_\infty^2\mid\mathcal F_{t-1}]&\le G_{w,0}^2,\\
+  \E[\|\widehat g_t^{w,\mu}\|_\infty^2\mid\mathcal F_{t-1}]&\le G_{w,\mu}^2.
+  \label{eq:derived-oracle-bounds}
+\end{align}
+Here the dual infinity bound is proved coordinatewise; the Lean development
+does not identify it definitionally with the default function-space norm.
+
+Oracle integrability is derived, not assumed.  Fresh selected mixed and fourth
+moments first give integrability of
+$\|\widehat g_t^b\|_2^2$.  Coordinate domination
+$|[\widehat g_t^b]_i|^2\le\|\widehat g_t^b\|_2^2$ and the probability-space
+implication $L^2\subseteq L^1$ give primal coordinate integrability.  The
+dual coordinate-bound process is controlled by
+\[
+  m(Y_t-X_t^\top b_t)^2+2\mu;
+\]
+the residual fourth-moment estimate gives integrability of its square, and
+the same $L^2\subseteq L^1$ argument gives dual coordinate integrability.
+Trajectory feasibility, simplex invariance, and oracle measurability supply
+the adaptive parts of these arguments.
+
+\subsection{Coupled projected-SGD/EG recursion and indexing}
+
+We use the paper-style convention $t=1,\ldots,T$.  Lean uses the zero-based
+range $r=0,\ldots,T-1$; the note's $(b_t,w_t)$ corresponds to Lean's state at
+$r=t-1$.  Initialize
+\begin{equation}
+  b_1=b_{\rm Init}\in C,
+  \qquad
+  w_1^{\rm alg}=m^{-1}\mathbf 1.
+  \label{eq:algorithm-initialization}
+\end{equation}
+The superscript distinguishes the algorithmic uniform initialization from the
+fixed comparator $w^0$.  For constant positive steps $\eta_b,\eta_w$, define
+\begin{align}
+  b_{t+1}
+  &=P_C\bigl(b_t-\eta_b\widehat g_t^b\bigr),
+  \label{eq:common-primal-update}\\
+  w_{t+1,j}
+  &=\frac{w_{t,j}\exp(\eta_w[\widehat g_t^{w,\mu}]_j)}
+          {\sum_k w_{t,k}\exp(\eta_w[\widehat g_t^{w,\mu}]_k)}.
+  \label{eq:common-dual-update}
+\end{align}
+Thus the primal step is descent and the dual step is ascent.  Both oracles use
+the same current state and may use the same round sample.  The proof requires
+predictability of the displacement, not independence between the primal and
+dual stochastic gradients.
+
+The two error summaries used below are
+\begin{equation}
+  D_T:=\frac1T\sum_{t=1}^T\E\|b_t-\beta^*\|_2^2,
+  \qquad
+  \bar b_T:=\frac1T\sum_{t=1}^T b_t.
+  \label{eq:error-summaries}
+\end{equation}
+The final assumption interface additionally requires $m,T>0$,
+$\eta_b,\eta_w,\lambda>0$, and $\gamma\ge0$.  Penalized results require
+$\mu\ge0$.

@@ -1,0 +1,210 @@
+\section{Penalized NegDRO}
+\label{sec:penalized}
+
+For $\mu\ge0$, recall
+$\mathcal L_\mu(b,w)=\mathcal L(b,w)-\mu\|w\|_2^2$.  When $\mu>0$, the
+inner population objective is strongly concave and has a unique maximizer.
+Official Algorithm~1 of Wang et al.~\cite{wang2026negdro} computes the
+corresponding maximizer of an empirical objective before its primal step.  The
+algorithm in this note instead applies the simultaneous fresh-sample recursion
+\eqref{eq:common-primal-update}--\eqref{eq:common-dual-update}.  Its proof never
+requires the online weight $w_t$ to be an exact inner maximizer.
+
+\subsection{Fixed-witness direction and comparator identity}
+
+Let $d=b-\beta^*$ and define
+\begin{equation}
+  \varepsilon_{\rm id}
+  :=\frac{\|v_{\rm SEM}\|_2^2}
+          {\lambda(1+\gamma m)^2}.
+  \label{eq:penalized-identification-error}
+\end{equation}
+The risk expansion \eqref{eq:risk-expansion} and the spectral witness imply
+the following direction inequality.
+
+\begin{lemma}[Fixed-witness direction]
+\label{lem:penalized-fixed-witness}
+For every $b\in\R^p$,
+\begin{equation}
+  (b-\beta^*)^\top\nabla_b\mathcal L_\mu(b,w^0)
+  \ge
+  \lambda\|b-\beta^*\|_2^2-\varepsilon_{\rm id}.
+  \label{eq:penalized-fixed-witness-rsi}
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+The penalty is independent of $b$.  Decomposing the weighted second-moment
+matrix into the positive-semidefinite average second-moment matrix and
+$A(w^0)$ gives
+\[
+  \frac12d^\top\nabla_b\mathcal L_\mu(b,w^0)
+  \ge
+  \lambda\|d\|_2^2
+  -\frac{\|v_{\rm SEM}\|_2}{1+\gamma m}\|d\|_2.
+\]
+Young's inequality absorbs one copy of the quadratic curvature, giving
+\eqref{eq:penalized-fixed-witness-rsi}.  Notice that the identification term
+at this direction stage is
+$\|v_{\rm SEM}\|_2^2/[\lambda(1+\gamma m)^2]$.
+\end{proof}
+
+Define the comparator-minus-current quantity
+\begin{equation}
+  \operatorname{Reg}_{t,\mu}^0
+  :=\mathcal L_\mu(b_t,w^0)-\mathcal L_\mu(b_t,w_t).
+  \label{eq:penalized-comparator-regret}
+\end{equation}
+It need not be nonnegative at a particular round.
+
+\begin{lemma}[Penalized comparator reduction]
+\label{lem:penalized-comparator-reduction}
+For every round $t$,
+\begin{equation}
+  (b_t-\beta^*)^\top\nabla_b\mathcal L_\mu(b_t,w_t)
+  \ge
+  \lambda\|b_t-\beta^*\|_2^2
+  -\varepsilon_{\rm id}-2\operatorname{Reg}_{t,\mu}^0-2\mu.
+  \label{eq:penalized-comparator-direction}
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+The common scalar identity in Appendix~\ref{app:proofs} gives
+\begin{align*}
+  &(b_t-\beta^*)^\top\nabla_b\mathcal L_\mu(b_t,w_t)\\
+  &\quad=(b_t-\beta^*)^\top\nabla_b\mathcal L_\mu(b_t,w^0)
+      -2\operatorname{Reg}_{t,\mu}^0
+      -2\mu\bigl(\|w^0\|_2^2-\|w_t\|_2^2\bigr).
+\end{align*}
+For simplex vectors, $\|w^0\|_2^2\le1$ and
+$\|w_t\|_2^2\ge0$, so the last difference is at most one.  Combining this
+fact with Lemma~\ref{lem:penalized-fixed-witness} proves the claim.  This is
+the sole source of the structural $2\mu$ loss.
+\end{proof}
+
+\subsection{Entropy regret and projected recursion}
+
+The exact exponentiated-gradient update remains strictly positive and in the
+simplex.  The formalized entropy argument proves the three-point identity,
+finite Pinsker inequality
+\[
+  \frac12\|p-q\|_1^2\le D_\Phi(p,q),
+\]
+coordinate H\"older, and the scalar square completion
+\[
+  -\frac12a^2+ba\le\frac12b^2.
+\]
+It also proves terminal Bregman nonnegativity for a possibly boundary
+comparator and the initial-potential bound
+$D_\Phi(w^0,m^{-1}\mathbf1)\le\log m$.  Therefore no Pinsker, mirror-step,
+initial-potential, or terminal-potential premise remains in the final theorem.
+With the conditional dual moment estimate from
+\eqref{eq:derived-oracle-bounds}, the resulting expected regret is
+\begin{equation}
+  \sum_{t=1}^T\E[\operatorname{Reg}_{t,\mu}^0]
+  \le
+  \frac{\log m}{\eta_w}
+  +\frac{\eta_wT G_{w,\mu}^2}{2}.
+  \label{eq:penalized-static-regret}
+\end{equation}
+
+The actual nearest-point projection satisfies, because $\beta^*\in C$,
+\[
+  \|b_{t+1}-\beta^*\|_2^2
+  \le\|b_t-\eta_b\widehat g_t^b-\beta^*\|_2^2.
+\]
+Predictability and the a.e. conditional mean identity turn the cross term into
+the population direction.  The conditional primal second-moment bound then
+gives
+\begin{align*}
+  \E\|b_{t+1}-\beta^*\|_2^2
+  \le{}&\E\|b_t-\beta^*\|_2^2
+  -2\eta_b\E\!\left[
+    (b_t-\beta^*)^\top\nabla_b\mathcal L_\mu(b_t,w_t)
+  \right]
+  +\eta_b^2G_b^2.
+\end{align*}
+Substitution of Lemma~\ref{lem:penalized-comparator-reduction} and telescoping
+complete the finite-time proof.
+
+\subsection{Verified penalized conclusions}
+
+The assumptions in the following results are precisely those stated in
+Section~\ref{sec:setup}: the corrected realized model and primitive moments,
+the universal fresh conditional law and adaptedness conditions, the bounded
+closed convex feasible set, the simplex spectral witness, positive horizon and
+step sizes, and the ambient probability-measure condition.  In addition,
+$\mu\ge0$.
+
+\begin{theorem}[Penalized finite-time expected squared error]
+\label{thm:penalized-fixed-comparator}
+The recursion \eqref{eq:common-primal-update}--\eqref{eq:common-dual-update}
+satisfies
+\begin{align}
+  D_T\le{}&
+  \frac{\|b_{\rm Init}-\beta^*\|_2^2}
+       {2\lambda\eta_bT}
+  +\frac{\|v_{\rm SEM}\|_2^2}
+       {\lambda^2(1+\gamma m)^2}
+  +\frac{2\mu}{\lambda}
+  +\frac{2\log m}{\lambda\eta_wT}
+  \notag\\
+  &\quad
+  +\frac{\eta_wG_{w,\mu}^2}{\lambda}
+  +\frac{\eta_bG_b^2}{2\lambda}.
+  \label{eq:penalized-average-bound}
+\end{align}
+\end{theorem}
+
+\begin{theorem}[Penalized averaged-iterate expected squared error]
+\label{thm:penalized-averaged-iterate}
+For $\bar b_T$ from \eqref{eq:error-summaries},
+\begin{align}
+  \E\|\bar b_T-\beta^*\|_2^2\le{}&
+  \frac{\|b_{\rm Init}-\beta^*\|_2^2}
+       {2\lambda\eta_bT}
+  +\frac{\|v_{\rm SEM}\|_2^2}
+       {\lambda^2(1+\gamma m)^2}
+  +\frac{2\mu}{\lambda}
+  +\frac{2\log m}{\lambda\eta_wT}
+  \notag\\
+  &\quad
+  +\frac{\eta_wG_{w,\mu}^2}{\lambda}
+  +\frac{\eta_bG_b^2}{2\lambda}.
+  \label{eq:penalized-averaged-iterate-bound}
+\end{align}
+\end{theorem}
+
+The second theorem follows from the first trajectory calculation together
+with finite-dimensional Jensen.  It concerns the random averaged iterate, not
+the terminal state $b_{T+1}$ after the $T$ updates.
+
+For the rate specialization, define
+\begin{align}
+  B_{\rm id}
+  &:=\frac{\|v_{\rm SEM}\|_2^2}
+          {\lambda^2(1+\gamma m)^2},
+  \label{eq:identification-bias}\\
+  C_\mu
+  &:=\frac{\|b_{\rm Init}-\beta^*\|_2^2}{2\lambda}
+     +\frac{2\log m}{\lambda}
+     +\frac{G_{w,\mu}^2}{\lambda}
+     +\frac{G_b^2}{2\lambda}.
+  \label{eq:penalized-rate-constant}
+\end{align}
+
+\begin{corollary}[Penalized inverse-square-root rate]
+\label{cor:penalized-inv-sqrt}
+If $\eta_b=\eta_w=1/\sqrt T$, then
+\begin{equation}
+  D_T
+  \le B_{\rm id}+\frac{2\mu}{\lambda}+\frac{C_\mu}{\sqrt T}.
+  \label{eq:penalized-inv-sqrt-rate}
+\end{equation}
+\end{corollary}
+
+The $2\mu/\lambda$ term appears exactly once; there is no $2\mu T$ term.  The
+corollary is an expected squared-error statement.  Taking a square root gives
+an RMS consequence under the usual nonnegativity conditions, not a theorem
+about $\E\|b_t-\beta^*\|_2$.
