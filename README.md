@@ -241,6 +241,10 @@ PDF is tracked because that font is platform-specific.
 
 The mathematical setup originates in the NegDRO work of Wang, Hu, Bühlmann, and Guo linked
 above; the projected stochastic SGD/EG result formalized here is the extension developed in this
-project. Authorship, acknowledgment wording, repository license, and citation metadata remain to
-be confirmed before a public v1.0 release. This repository is a private release candidate; no
-public release or third-party certification is claimed.
+project. Citation metadata for a tagged v1.0 release remains to be finalized. The repository
+source is publicly available under the Apache License 2.0; no tagged v1.0 release or third-party
+certification is claimed.
+
+## License
+
+This project is licensed under the Apache License 2.0. See [LICENSE](LICENSE).
